@@ -1,0 +1,14 @@
+{
+  "name": "BLOXNOVA — Top Up Robux",
+  "short_name": "BLOXNOVA",
+  "description": "Top up Robux instan & aman via QRIS. Notifikasi langsung saat pesanan disetujui.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0e1013",
+  "theme_color": "#0e1013",
+  "icons": [
+    { "src": "/assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

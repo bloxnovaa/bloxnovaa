@@ -1,0 +1,12 @@
+{
+  "name": "bloxnovaa",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@netlify/blobs": "^11.1.6",
+    "@netlify/database": "^2.0.1",
+    "@netlify/functions": "^6.0.3",
+    "qrcode": "^1.5.4",
+    "web-push": "^3.6.7"
+  }
+}
