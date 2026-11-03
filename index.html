@@ -1338,7 +1338,7 @@
           <button type="button" onclick="copyCheckoutValue('price')" class="mt-2 w-full py-2 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 text-emerald-300 text-xs font-mono font-bold flex items-center justify-center gap-1.5">
             <span>📋</span> <span data-en="Copy Amount">Salin Nominal</span> <span id="qrisCopyAmount" class="text-white">25000</span>
           </button>
-          <p id="qrisModeNote" class="text-[10px] text-rebelGold mt-1.5">✓ Nominal sudah otomatis terisi saat scan — tinggal cek & bayar.</p>
+          <p id="qrisModeNote" class="text-[10px] text-rebelGold mt-1.5">Scan QRIS, lalu ketik nominal ini persis (tidak lebih, tidak kurang) di aplikasi pembayaran.</p>
         </div>
 
         <!-- GAMBAR QRIS OTOMATIS SESUAI HARGA -->
@@ -1348,7 +1348,7 @@
           <!-- Fallback jika file lokal belum dimuat di perangkat -->
           <div id="qrisFallbackPrompt" role="status" aria-live="polite" class="flex flex-col items-center justify-center p-3 text-slate-800 text-center w-full">
             <div class="font-bold text-xs" id="fallbackTitle">Memuat QRIS...</div>
-            <p id="qrisStatusMessage" class="text-xs text-slate-500 my-2 leading-relaxed">Menyiapkan QRIS sesuai nominal tagihan.</p>
+            <p id="qrisStatusMessage" class="text-xs text-slate-500 my-2 leading-relaxed">Memuat QRIS pembayaran.</p>
             <button data-en="Reload QRIS" id="retryQrisButton" type="button" onclick="retryActiveQris()" class="hidden px-4 py-2 rounded-lg bg-slate-900 text-white text-xs font-bold">Muat Ulang QRIS</button>
           </div>
         </div>
@@ -1365,7 +1365,7 @@
             <li data-en="Open any QRIS-enabled app (DANA, GoPay, OVO, ShopeePay, BCA, etc.) and pick &lt;b&gt;Scan / Pay&lt;/b&gt;.">Buka aplikasi berlogo QRIS (DANA, GoPay, OVO, ShopeePay, BCA, dll.) lalu pilih menu <b>Scan / Bayar</b>.</li>
             <li data-en="Scan the QRIS above. On the same phone? Tap &lt;b&gt;Save QRIS Image&lt;/b&gt; and upload it from your gallery.">Scan QRIS di atas. Bayar dari HP yang sama? Tekan <b>Simpan Gambar QRIS</b>, lalu unggah dari galeri.</li>
             <li data-en="Make sure the merchant reads &lt;b&gt;DevUtility&lt;/b&gt; (NMID ID1025401517715).">Pastikan nama penerima <b>DevUtility</b> (NMID ID1025401517715).</li>
-            <li data-en="The amount fills in automatically. Make sure it matches the &lt;b&gt;amount due&lt;/b&gt; above (if your app asks for it, tap Copy Amount and paste).">Nominal terisi otomatis. Pastikan sama dengan <b>tagihan di atas</b> (jika aplikasi meminta nominal, tekan Salin Nominal lalu tempel).</li>
+            <li data-en="Type the &lt;b&gt;exact amount due&lt;/b&gt; above in your payment app (tap Copy Amount and paste so it matches exactly).">Ketik nominal persis sesuai <b>tagihan di atas</b> di aplikasi pembayaran (tekan Salin Nominal lalu tempel agar pas).</li>
             <li data-en="Confirm the payment and screenshot the success screen.">Konfirmasi pembayaran dan screenshot bukti berhasil.</li>
             <li data-en="Tap &lt;b&gt;Paid? Upload Your Proof Here&lt;/b&gt; and send your screenshot.">Tekan <b>Sudah Bayar? Unggah Bukti di Sini</b> lalu kirim screenshot-nya.</li>
           </ol>
@@ -1995,15 +1995,15 @@
       const img = document.getElementById('qrisImageTarget');
       const prompt = document.getElementById('qrisFallbackPrompt');
       const requestId = ++qrisRequestId;
-      // QRIS with the amount embedded; the printed static QRIS is the fallback if it can't be generated.
-      const filename = `/api/qris?amount=${price}`;
-      let usingStatic = false;
+      // Static DevUtility QRIS (the printed one): the buyer types the exact amount in their payment app.
+      const filename = customQrisAsset;
+      const usingStatic = true;
       qrisReady = false;
       img.classList.add('hidden');
       img.removeAttribute('src');
       prompt.classList.remove('hidden');
       document.getElementById('fallbackTitle').innerText = tr('Memuat QRIS...', 'Loading QRIS...');
-      document.getElementById('qrisStatusMessage').innerText = tr('Menyiapkan QRIS sesuai nominal tagihan.', 'Preparing the QRIS for your order.');
+      document.getElementById('qrisStatusMessage').innerText = tr('Memuat QRIS pembayaran.', 'Loading the payment QRIS.');
       document.getElementById('retryQrisButton').classList.add('hidden');
       setQrisActionsEnabled(false);
 
@@ -2033,11 +2033,6 @@
       };
       loader.onerror = () => {
         if (requestId !== qrisRequestId) return;
-        if (!usingStatic) {
-          usingStatic = true;
-          loader.src = customQrisAsset;
-          return;
-        }
         clearTimeout(timeout);
         showQrisLoadError(tr('Gambar QRIS belum berhasil dimuat. Periksa koneksi, lalu coba lagi. Jangan lakukan pembayaran sebelum QRIS tampil.', "The QRIS image couldn't load. Check your connection and try again. Don't pay until the QRIS appears."));
       };
@@ -2046,7 +2041,7 @@
 
     function setQrisModeNote(isStatic) {
       document.getElementById('qrisModeNote').innerText = isStatic
-        ? tr('QRIS otomatis sedang tidak tersedia. Ketik nominal ini persis (tidak lebih, tidak kurang) di aplikasi pembayaran.', "The auto-amount QRIS isn't available right now. Type this exact amount (no more, no less) in your payment app.")
+        ? tr('Scan QRIS, lalu ketik nominal ini persis (tidak lebih, tidak kurang) di aplikasi pembayaran.', 'Scan the QRIS, then type this exact amount (no more, no less) in your payment app.')
         : tr('✓ Nominal sudah otomatis terisi saat scan — tinggal cek & bayar.', '✓ The amount fills in automatically when you scan — just check & pay.');
     }
 
@@ -2504,7 +2499,7 @@
     let qrisReady = false;
     let qrisRequestId = 0;
 
-    const customQrisAsset = 'assets/qris/devutility-static.jpeg';
+    const customQrisAsset = '/assets/qris/devutility-static.jpeg';
 
     function validCustomPrice(price = customPrice) {
       return Number.isSafeInteger(price) && price >= 25000;
